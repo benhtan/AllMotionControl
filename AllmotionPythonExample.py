@@ -56,19 +56,19 @@ def read_encoder(ser, motor):
     end_idx = resp.index('x03') - 1
     return int(resp[start_idx : end_idx])
 
-
-# send_command_then_wait_for_ready(ser, b'/1aM1aE1000V5000L10Z116800R\r\n')
-# send_command_then_wait_for_ready(ser, b'/1aM1V59900L30A100000R\r\n')
-# send_command_then_wait_for_ready(ser, b'/1aM1aE1000V5000L10Z116800R\r\n')
+def encoder_CV_Test(ser):
+    res = []
+    for i in range(10):
+        send_command_then_wait_for_ready(ser, b'/1aM1aE1000V20000L30Z116800R\r\n')
+        send_command_then_wait_for_ready(ser, b'/1aM1aE1000V1000L10Z116800R\r\n')
+        send_command_then_wait_for_ready(ser, b'/1aM1z0R\r\n')
+        send_command_then_wait_for_ready(ser, b'/1aM1V59900L30A100000R\r\n')
+        res.append(read_encoder(ser, 1))
+        print(res)
+    
+    return res
+        
 ser = find_AllMotion()
-send_command_then_wait_for_ready(ser, b'/1aM1aE5000V5000L30Z116800R\r\n')
-send_command_then_wait_for_ready(ser, b'/1aM1aE1000V5000L10Z116800R\r\n')
-
-send_command_then_wait_for_ready(ser, b'/1aM2V5000L10Z134400R\r\n')
-
-send_command_then_wait_for_ready(ser, b'/1aM1z0R\r\n')
-print(read_encoder(ser, 1))
-send_command_then_wait_for_ready(ser, b'/1aM1V59900L30A100000R\r\n')
-print(read_encoder(ser, 1))
+encoder_CV_Test(ser)
 
 ser.close()  
