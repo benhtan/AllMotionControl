@@ -42,14 +42,33 @@ def find_AllMotion():
                 ser.close()
         except (OSError, serial.SerialException):
             pass
-    return None
+    raise Exception("AllMotion Not Found")
+
+def read_encoder(ser, motor):
+    if motor not in [1,2,3,4]:
+        raise Exception('Motor number invalid')
+    cmd_string = f'/1aM{motor}R\r\n'
+    send_command_then_wait_for_ready(ser, bytes(cmd_string, 'utf-8'))   # switch to selected motor
+    ser.write(b'/1?8\r\n')  # query encoder
+    resp = str(read_response(ser))
+    # print(resp)
+    start_idx = resp.index('/0`') + 3
+    end_idx = resp.index('x03') - 1
+    return int(resp[start_idx : end_idx])
 
 
 # send_command_then_wait_for_ready(ser, b'/1aM1aE1000V5000L10Z116800R\r\n')
 # send_command_then_wait_for_ready(ser, b'/1aM1V59900L30A100000R\r\n')
 # send_command_then_wait_for_ready(ser, b'/1aM1aE1000V5000L10Z116800R\r\n')
 ser = find_AllMotion()
+send_command_then_wait_for_ready(ser, b'/1aM1aE5000V5000L30Z116800R\r\n')
 send_command_then_wait_for_ready(ser, b'/1aM1aE1000V5000L10Z116800R\r\n')
-send_command_then_wait_for_ready(ser, b'/1aM1aE1000V5000L10Z116800R\r\n')
+
+send_command_then_wait_for_ready(ser, b'/1aM2V5000L10Z134400R\r\n')
+
+send_command_then_wait_for_ready(ser, b'/1aM1z0R\r\n')
+print(read_encoder(ser, 1))
 send_command_then_wait_for_ready(ser, b'/1aM1V59900L30A100000R\r\n')
+print(read_encoder(ser, 1))
+
 ser.close()  
