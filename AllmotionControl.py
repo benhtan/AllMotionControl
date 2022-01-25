@@ -95,6 +95,9 @@ def home_X(ser):
 def Z_down(ser):
     send_command_then_wait_for_ready(ser, b'/1aM2V59900L50A109606R\r\n')
 
+def Z_up(ser):
+    send_command_then_wait_for_ready(ser, b'/1aM2V59900L50A0R\r\n')
+
 def go_to_all_WP_loc(ser):
     for i in range(10):
         home_Z(ser)
@@ -102,11 +105,13 @@ def go_to_all_WP_loc(ser):
         
         send_command_then_wait_for_ready(ser, b'/1aM1V59000L50A18975R\r\n')     # col 12
         Z_down(ser)
+        Z_up(ser)
         home_Z(ser)
         
         for j in range(11):
             send_command_then_wait_for_ready(ser, b'/1aM1V59000L50P5669R\r\n')  # go to next column
             Z_down(ser)
+            Z_up(ser)
             home_Z(ser)
         
         send_command_then_wait_for_ready(ser, b'/1aM1V59900L50A0R\r\n')         # go to 0 (wash station)
