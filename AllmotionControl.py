@@ -86,12 +86,12 @@ def back_and_forth_y(ser):
 
 def go_to_all_WP_loc(ser):
     for i in range(10):
-        send_command_then_wait_for_ready(ser, b'/1aM1V10000L20Z116800R\r\n')
-        send_command_then_wait_for_ready(ser, b'/1aM1V1000L10Z116800R\r\n')
-        send_command_then_wait_for_ready(ser, b'/1aM1V59000L50A18975R\r\n')
+        send_command_then_wait_for_ready(ser, b'/1aM1V10000L20Z116800R\r\n')    # home
+        send_command_then_wait_for_ready(ser, b'/1aM1V1000L10Z116800R\r\n')     # home
+        send_command_then_wait_for_ready(ser, b'/1aM1V59000L50A18975R\r\n')     # col 12
         for j in range(11):
-            send_command_then_wait_for_ready(ser, b'/1aM1V59000L50P5669R\r\n')
-        send_command_then_wait_for_ready(ser, b'/1aM1V59900L50A0R\r\n')
+            send_command_then_wait_for_ready(ser, b'/1aM1V59000L50P5669R\r\n')  # to other columns
+        send_command_then_wait_for_ready(ser, b'/1aM1V59900L50A0R\r\n')         # go to 0 (wash station)
         print(i)
         
 ser = find_AllMotion()
