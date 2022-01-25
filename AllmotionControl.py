@@ -83,19 +83,38 @@ def back_and_forth_y(ser):
         send_command_then_wait_for_ready(ser, b'/1aM2V59900L50A100000R\r\n')
         send_command_then_wait_for_ready(ser, b'/1aM2V59900L50A0R\r\n')
         print(i)
+        
+def home_Z(ser):
+    send_command_then_wait_for_ready(ser, b'/1aM2V20000L50Z134400R\r\n')    # home fast
+    send_command_then_wait_for_ready(ser, b'/1aM2V5000L50Z5000R\r\n')    # home slow
+    
+def home_X(ser):
+    send_command_then_wait_for_ready(ser, b'/1aM1V10000L20Z116800R\r\n')    # home fast
+    send_command_then_wait_for_ready(ser, b'/1aM1V1000L10Z1200R\r\n')     # home slow
+    
+def Z_down(ser):
+    send_command_then_wait_for_ready(ser, b'/1aM2V59900L50A109606R\r\n')
 
 def go_to_all_WP_loc(ser):
     for i in range(10):
-        send_command_then_wait_for_ready(ser, b'/1aM1V10000L20Z116800R\r\n')    # home
-        send_command_then_wait_for_ready(ser, b'/1aM1V1000L10Z116800R\r\n')     # home
+        home_Z(ser)
+        home_X(ser)
+        
         send_command_then_wait_for_ready(ser, b'/1aM1V59000L50A18975R\r\n')     # col 12
+        Z_down(ser)
+        home_Z(ser)
+        
         for j in range(11):
-            send_command_then_wait_for_ready(ser, b'/1aM1V59000L50P5669R\r\n')  # to other columns
+            send_command_then_wait_for_ready(ser, b'/1aM1V59000L50P5669R\r\n')  # go to next column
+            Z_down(ser)
+            home_Z(ser)
+        
         send_command_then_wait_for_ready(ser, b'/1aM1V59900L50A0R\r\n')         # go to 0 (wash station)
         print(i)
         
 ser = find_AllMotion()
 
 go_to_all_WP_loc(ser)
+# home_X(ser)
 
 ser.close()  
