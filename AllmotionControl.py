@@ -68,7 +68,7 @@ def encoder_CV_Test(ser):
     
     return res
 
-def back_and_forth(ser):
+def back_and_forth_x(ser):
     for i in range(10):
         send_command_then_wait_for_ready(ser, b'/1aM1V10000L20Z116800R\r\n')
         send_command_then_wait_for_ready(ser, b'/1aM1V1000L10Z116800R\r\n')
@@ -76,8 +76,26 @@ def back_and_forth(ser):
         send_command_then_wait_for_ready(ser, b'/1aM1V59900L50A0R\r\n')
         print(i)
         
+def back_and_forth_y(ser):
+    for i in range(10):
+        send_command_then_wait_for_ready(ser, b'/1aM2V20000L50Z134400R\r\n')
+        send_command_then_wait_for_ready(ser, b'/1aM2V20000L50Z134400R\r\n')
+        send_command_then_wait_for_ready(ser, b'/1aM2V59900L50A100000R\r\n')
+        send_command_then_wait_for_ready(ser, b'/1aM2V59900L50A0R\r\n')
+        print(i)
+
+def go_to_all_WP_loc(ser):
+    for i in range(10):
+        send_command_then_wait_for_ready(ser, b'/1aM1V10000L20Z116800R\r\n')
+        send_command_then_wait_for_ready(ser, b'/1aM1V1000L10Z116800R\r\n')
+        send_command_then_wait_for_ready(ser, b'/1aM1V59000L50A18975R\r\n')
+        for in range(12):
+            send_command_then_wait_for_ready(ser, b'/1aM1V59000L50P5669R\r\n')
+        send_command_then_wait_for_ready(ser, b'/1aM1V59900L50A0R\r\n')
+        print(i)
+        
 ser = find_AllMotion()
 
-back_and_forth(ser)
+go_to_all_WP_loc(ser)
 
 ser.close()  
