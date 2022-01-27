@@ -6,6 +6,7 @@
 
 import serial
 import time
+import random
 
 # read response
 def read_response(ser):
@@ -14,6 +15,7 @@ def read_response(ser):
 # ser has to be serial.Serial object. command is b'/1 command string'
 def send_command_then_wait_for_ready(ser, command):
     ser.write(command)
+    time.sleep(.1)
     resp = read_response(ser)
     # print(resp)
     waitForReady(ser)
@@ -141,11 +143,30 @@ def go_to_all_WP_loc(ser):
         
         send_command_then_wait_for_ready(ser, b'/1aM1A0R\r\n')         # go to 0 (wash station)
         print(i)
+        
+def go_to_random_WP_loc(ser):
+    for i in range(10):
+        home_Z(ser)
+        home_X(ser)
+        
+        well_loc = [18976, 24645, 30314, 35983, 41653, 47322, 52991, 58661, 64330, 69999, 75668, 81338]
+        
+        for j in range(12):
+            random.shuffle(well_loc)    # randomize order
+            go_to_X(ser, well_loc[i])   # go to well
+            Z_down(ser)
+            time.sleep(.5)
+            Z_up(ser)
+            home_Z(ser)
+        
+        send_command_then_wait_for_ready(ser, b'/1aM1A0R\r\n')         # go to 0 (wash station)
+        print(i)
  
 ser = find_AllMotion()
 
 # encoder_CV_Test(ser)
-go_to_all_WP_loc(ser)
+# go_to_all_WP_loc(ser)
 # back_and_forth_X(ser)
+go_to_random_WP_loc(ser)
 
 ser.close()  
