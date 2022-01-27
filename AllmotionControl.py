@@ -14,16 +14,20 @@ def read_response(ser):
 # ser has to be serial.Serial object. command is b'/1 command string'
 def send_command_then_wait_for_ready(ser, command):
     ser.write(command)
+    resp = read_response(ser)
+    # print(resp)
     waitForReady(ser)
 
 # ser has to be serial.Serial object
 def waitForReady(ser):
+    resp = ''
     while True:
         ser.write(b'/1Q\r\n')
         resp = read_response(ser)
         # print(resp)
         if b'/0`' in resp:
             break
+    return resp
 
 # find AllMotion in list of COM ports
 def find_AllMotion():
@@ -56,70 +60,92 @@ def read_encoder(ser, motor):
     end_idx = resp.index('x03') - 1
     return int(resp[start_idx : end_idx])
 
+def set_default_speed_accel(ser):
+    send_command_then_wait_for_ready(ser, b'/1aM1V40000L20R\r\n')
+    send_command_then_wait_for_ready(ser, b'/1aM1aaL500R\r\n')
+    send_command_then_wait_for_ready(ser, b'/1aM1aL5R\r\n')
+    
+    send_command_then_wait_for_ready(ser, b'/1aM2V40000L10R\r\n')
+    send_command_then_wait_for_ready(ser, b'/1aM2aL5aaL500R\r\n')
+    
+def enable_limit_mode(ser):
+    send_command_then_wait_for_ready(ser, b'/1aM1n2\r\n')
+    send_command_then_wait_for_ready(ser, b'/1aM2n2\r\n')
+
+def home_Z(ser):
+    send_command_then_wait_for_ready(ser, b'/1aM2n0\r\n')
+    send_command_then_wait_for_ready(ser, b'/1aM2V20000L10Z134400R\r\n')    # home fast
+    send_command_then_wait_for_ready(ser, b'/1aM2V5000L10Z5000R\r\n')    # home slow
+    set_default_speed_accel(ser)
+    
+def home_X(ser):
+    send_command_then_wait_for_ready(ser, b'/1aM1n0\r\n')
+    send_command_then_wait_for_ready(ser, b'/1aM1V10000L20Z116800R\r\n')    # home fast
+    send_command_then_wait_for_ready(ser, b'/1aM1V1000L20Z1200R\r\n')     # home slow
+    set_default_speed_accel(ser)
+    
+def Z_down(ser):
+    send_command_then_wait_for_ready(ser, b'/1aM2A109606R\r\n')
+
+def Z_up(ser):
+    send_command_then_wait_for_ready(ser, b'/1aM2A0R\r\n')
+    
+def go_to_X(ser, coord):
+    cmd_string = f'/1aM1A{coord}R\r\n'
+    send_command_then_wait_for_ready(ser, bytes(cmd_string, 'utf-8'))
+
 def encoder_CV_Test(ser):
     res = []
     for i in range(10):
         home_X(ser)
         send_command_then_wait_for_ready(ser, b'/1aM1z0R\r\n')
-        send_command_then_wait_for_ready(ser, b'/1aM1V30000L30A100000R\r\n')
+        send_command_then_wait_for_ready(ser, b'/1aM1V3500A100000R\r\n')
         res.append(read_encoder(ser, 1))
         print(res)
         
-        send_command_then_wait_for_ready(ser, b'/1aM1V59900L30A0R\r\n')
+        send_command_then_wait_for_ready(ser, b'/1aM1V59900A0R\r\n')
     
     return res
 
 def back_and_forth_X(ser):
     for i in range(10):
         home_X(ser)
-        send_command_then_wait_for_ready(ser, b'/1aM1V59000L50A110000R\r\n')
-        send_command_then_wait_for_ready(ser, b'/1aM1V59900L50A0R\r\n')
+        # enable_limit_mode(ser)
+        send_command_then_wait_for_ready(ser, b'/1aM1A100000R\r\n')
+        send_command_then_wait_for_ready(ser, b'/1aM1A0R\r\n')
         print(i)
         
 def back_and_forth_Z(ser):
     for i in range(10):
         home_Z(ser)
-        send_command_then_wait_for_ready(ser, b'/1aM2V59900L50A100000R\r\n')
-        send_command_then_wait_for_ready(ser, b'/1aM2V59900L50A0R\r\n')
+        send_command_then_wait_for_ready(ser, b'/1aM2A100000R\r\n')
+        send_command_then_wait_for_ready(ser, b'/1aM2A0R\r\n')
         print(i)
-        
-def home_Z(ser):
-    send_command_then_wait_for_ready(ser, b'/1aM2V20000L50Z134400R\r\n')    # home fast
-    send_command_then_wait_for_ready(ser, b'/1aM2V5000L50Z5000R\r\n')    # home slow
-    
-def home_X(ser):
-    send_command_then_wait_for_ready(ser, b'/1aM1V10000L20Z116800R\r\n')    # home fast
-    send_command_then_wait_for_ready(ser, b'/1aM1V1000L10Z1200R\r\n')     # home slow
-    
-def Z_down(ser):
-    send_command_then_wait_for_ready(ser, b'/1aM2V59900L50A109606R\r\n')
-
-def Z_up(ser):
-    send_command_then_wait_for_ready(ser, b'/1aM2V59900L50A0R\r\n')
 
 def go_to_all_WP_loc(ser):
     for i in range(10):
         home_Z(ser)
         home_X(ser)
         
-        send_command_then_wait_for_ready(ser, b'/1aM1V59000L50A18975R\r\n')     # col 12
+        # send_command_then_wait_for_ready(ser, b'/1aM1A18975R\r\n')     # col 12
+        go_to_X(ser, 18975)
         Z_down(ser)
         Z_up(ser)
         home_Z(ser)
         
         for j in range(11):
-            send_command_then_wait_for_ready(ser, b'/1aM1V59000L50P5669R\r\n')  # go to next column
+            send_command_then_wait_for_ready(ser, b'/1aM1P5669R\r\n')  # go to next column
             Z_down(ser)
             Z_up(ser)
             home_Z(ser)
         
-        send_command_then_wait_for_ready(ser, b'/1aM1V59900L50A0R\r\n')         # go to 0 (wash station)
+        send_command_then_wait_for_ready(ser, b'/1aM1A0R\r\n')         # go to 0 (wash station)
         print(i)
-        
+ 
 ser = find_AllMotion()
 
-encoder_CV_Test(ser)
-# go_to_all_WP_loc(ser)
-# home_X(ser)
+# encoder_CV_Test(ser)
+go_to_all_WP_loc(ser)
+# back_and_forth_X(ser)
 
 ser.close()  
